@@ -14,6 +14,7 @@
  * ----------------------------------------------------------------------------
  *\
 TO DO:
+most important: FGZ crashes when you do not have an even ammount of games. 
 1. Write options menu with "openfiledir" and other toggleable options. 
 2. put settings for options into INI File
 3. figure out how to check adobe for the latest flash player and download. (seperate ini file?)
@@ -22,6 +23,7 @@ TO DO:
 6. make installer/standalone versions (standalone must delete files on exit)
 7. how to transfer w/ all your games????
 8. autorestart after adding games to folder
+
 
 LESS IMPORTANT:
 1. build website for program
@@ -36,6 +38,9 @@ LESS IMPORTANT:
 #include <File.au3>
 Global $swfgames = _FileListToArray(@scriptDir & "\files\swf\", "*", 1)
 Global $howmanygames = ubound($swfgames)
+If Mod($howmanygames, 2) = 0 Then
+   _arrayadd ($swfgames, "ZPLACEHOLDER....")
+EndIf
 
 func main()
 	Opt("GUIOneventmode", 1)
@@ -94,12 +99,16 @@ func main()
 	Next
 	
 ;~ 	open games folder button
-	$putwhere = $guiwidth / 4
+	$putwhere = $guiwidth / 2
 	guictrlcreatebutton("OPEN GAMES FOLDER", $putwhere, 2)
 	GUICtrlSetOnEvent(-1, "gamesdir")
 	
+;~ 	download games
+   
 	GUISetState(@sw_show)
-	
+	$putwhere = 0
+	guictrlcreatebutton("DOWNLOAD GAMEZ", $putwhere, 2)
+	GUICtrlSetOnEvent(-1, "download")
 	While 1
 		sleep (10)
 	WEnd
@@ -126,6 +135,31 @@ Func options()
 	WEnd
 EndFunc
 
+;~ Download function. 
+Func download()
+   while 1
+	  MsgBox(32, "How to Download", "Go to 'freegames.org' and pick a game. put the url of the game including 'http://www. ' into the next window and restart FGZ")
+	  $where = InputBox("", "enter URL")
+	  $name = StringTrimLeft($where, 21)
+	  $name2 = StringTrimRight($name, 1)
+	  InetGet("http://media.freegames.org/swf/" & $name2  & ".swf", @scriptdir & "\files\swf\" & $name2 & ".swf")
+	  if not FileExists (@scriptdir & "\" & $name2 & ".swf") Then
+		 msgbox(5, "Download Failed", "Whoops! Looks like the URL you entered didn't work. Make sure it has 'http://www.' at the begining. " & @CRLF & "You can also download them manually")
+		 if @error = 2 Then
+			ExitLoop
+		 EndIf
+	  ElseIf FileExists (@scriptdir & "\" & $name2 & ".swf") Then
+		 msgbox (0, "Success" "Download successful!")
+		 ExitLoop
+	  EndIf
+	  if @error = 4 Then
+		 ContinueLoop
+	  else
+		 ExitLoop
+	  EndIf
+   WEnd   
+EndFunc
+
 ;~ this function matches the name of the button clicked to the game name and adds the '.swf' extention to launch it
 Func launch($name)
 	for $q = 1 to $swfgames[0]
@@ -133,7 +167,7 @@ Func launch($name)
 		$buttonname = GUIctrlread(@gui_ctrlid)
 		if $buttonname == $name Then
 			$buttonname = $buttonname & ".swf"
-			shellexecute (@scriptdir & "\gamez\flashplayer_10_sa.exe", @scriptdir & "\files\swf\" & $buttonname)
+			shellexecute (@scriptdir & "\files\flashplayer_10_sa.exe", @scriptdir & "\files\swf\" & $buttonname)
 			ExitLoop
 		EndIf		
 	next
@@ -197,7 +231,10 @@ func errorcheck()
 			$responce = MsgBox(16, "WHOA THERE!!!", "You have more than 200 games in your games folder. This program wasn't designed to have that many! If you know what you're doing click OK, if you want to exit press cancel")
 			if not $responce == 1 Then
 				Exit
-			endif
+			 endif
+		  case mod($howmanygames, 2) = 0 
+			 FileCopy ($swfgames[1], @scriptdir & "\files\swf\ .swf")
+
 		EndSelect
 	EndFunc
 	
