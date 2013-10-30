@@ -1,0 +1,11 @@
+FGZ (Flash GameZ)
+launches flash games (swf) locally. 
+
+the best way to get flash games is to open up a game in your browser, view the source of that page, search for "swf" in the page to get a physical link to the swf. save the swf from that and drop in the "games folder". it will be apparent where that is once you run the program. 
+
+
+
+to do:
+fix so you can have odd number of games. 
+
+write swf downloader from specific sites. 
